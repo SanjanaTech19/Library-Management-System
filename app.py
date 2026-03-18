@@ -442,40 +442,73 @@ def library_system():
     # VIEW ALL BOOKS
     elif choice == "View All Books":
         st.subheader("📚 Library Catalog")
-        search = st.text_input("🔍 Search...")
+        
+        # 1. Search Bar
+        search = st.text_input("🔍 Search by Title or Author...", placeholder="e.g. Harry Potter")
+        
         conn = get_db_connection()
         if conn:
-            df = pd.read_sql("SELECT * FROM books", conn) # Add WHERE filters if needed
-            for index, row in df.iterrows():
-                book_id = row.get('id') or row.get('ID')
-                with st.container():
-                    col_info, col_btn1, col_btn2 = st.columns([4, 1, 1])
-                    with col_info:
-                        st.write(f"**{row['title']}** | {row['author']}")
-                        st.caption(f"Copies: {row.get('copies', 0)} | Status: {row['status']}")
+            # 2. Dynamic Filtering Logic
+            if search:
+                # Use SQL LIKE for partial matching (case-insensitive in MySQL)
+                query = "SELECT * FROM books WHERE title LIKE %s OR author LIKE %s"
+                df = pd.read_sql(query, conn, params=(f"%{search}%", f"%{search}%"))
+            else:
+                df = pd.read_sql("SELECT * FROM books", conn)
 
-                    if user_role == "user":
-                        # BORROW BUTTON
-                        if col_btn1.button("Borrow", key=f"br_{book_id}", disabled=(row.get('copies', 0) <= 0)):
-                            st.session_state.selected_book_title = row['title']
-                            st.session_state.menu_choice = "Borrow Book"
-                            st.rerun()
+            if df.empty:
+                st.info("No books found in the library yet.")
+            else:
+                st.write(f"Showing {len(df)} results:")
+                
+                # 3. Iterating through the books
+                for index, row in df.iterrows():
+                    # Check for ID column (handle potential case differences in DB)
+                    book_id = row.get('id') or row.get('ID') or index
+                    
+                    with st.container():
+                        col_info, col_btn1, col_btn2 = st.columns([3, 1, 1])
                         
-                        # RETURN BUTTON
-                        if col_btn2.button("Return", key=f"ret_{book_id}"):
-                            st.session_state.selected_book_title = row['title']
-                            st.session_state.menu_choice = "Return Book"
-                            st.rerun()
-                
-                    elif user_role == "admin":
-                        if col_btn2.button("🗑️ Delete", key=f"del_{book_id}"):
-                            cursor = conn.cursor()
-                            cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
-                            conn.commit()
-                            st.toast(f"Deleted {row['title']}")
-                            st.rerun()
-                
-                st.divider()
+                        with col_info:
+                            st.markdown(f"### {row['title']}")
+                            st.markdown(f"**Author:** {row['author']} | **Genre:** {row['genre']}")
+                            
+                            # Status Badge logic
+                            status = str(row['status']).lower()
+                            copies = row.get('copies', 0)
+                            
+                            if status == 'available' and copies > 0:
+                                st.success(f"✅ Available ({copies} copies left)")
+                            else:
+                                st.error("❌ Currently Out of Stock")
+
+                        # 4. Role-Based Actions
+                        if user_role == "user":
+                            # Borrow Button (Disabled if 0 copies)
+                            if col_btn1.button("📖 Borrow", key=f"br_{book_id}", disabled=(copies <= 0)):
+                                st.session_state.selected_book_title = row['title']
+                                st.session_state.menu_choice = "Borrow Book"
+                                st.rerun()
+                            
+                            # Return Button
+                            if col_btn2.button("🔄 Return", key=f"ret_{book_id}"):
+                                st.session_state.selected_book_title = row['title']
+                                st.session_state.menu_choice = "Return Book"
+                                st.rerun()
+
+                        elif user_role == "admin":
+                            # Admin Delete Function
+                            if col_btn2.button("🗑️ Delete", key=f"del_{book_id}"):
+                                try:
+                                    cursor = conn.cursor()
+                                    cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
+                                    conn.commit()
+                                    st.toast(f"Deleted '{row['title']}' from database", icon="🗑️")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Error deleting: {e}")
+                    
+                    st.divider() # Line between each book card
             conn.close()
     # RECOMMENDATION
     elif choice == "Recommendation":
