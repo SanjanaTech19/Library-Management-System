@@ -128,6 +128,32 @@ st.markdown("""
     /* 7. CAPTIONS & METRICS */
     .stCaption, p { color: #E0E0E0 !important; }
     [data-testid="stMetricValue"] { color: #50C878 !important; }
+    
+            
+     /* FINAL NAVIGATION FIX: Black text on white/light dropdown items */
+    div[data-baseweb="popover"] li, 
+    div[data-baseweb="popover"] span,
+    div[role="listbox"] div,
+    [data-testid="stVirtualDropdown"] div {
+        color: #000000 !important; /* Forces black text */
+        background-color: transparent !important;
+        font-weight: 600 !important;
+    }
+
+    /* Keep the dropdown container white or very light for contrast */
+    div[data-baseweb="popover"] ul, 
+    div[data-baseweb="menu"] {
+        background-color: #FFFFFF !important; 
+        border: 1px solid #50C878 !important; /* Emerald border for style */
+    }
+
+    /* Hover state for dropdown items */
+    div[data-baseweb="popover"] li:hover {
+        background-color: #50C878 !important; /* Emerald highlight */
+        color: #000000 !important;
+    }       
+            
+            
     </style>
     """, unsafe_allow_html=True)
 
