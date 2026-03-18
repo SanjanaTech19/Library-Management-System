@@ -23,23 +23,65 @@ def get_db_connection():
 # --- 2. PAGE CONFIG & STYLING ---
 st.set_page_config(page_title="The Reading Nook", page_icon="📚", layout="wide")
 
+# --- 2. PAGE CONFIG & STYLING ---
+st.set_page_config(page_title="The Reading Nook", page_icon="📚", layout="wide")
+
 st.markdown("""
     <style>
-    .stApp { background-color: #b9d8e4; }
-    h1, h2, h3 { color: #483D8B; }
-    .stButton>button { 
-        background-color: #f6cab7; 
-        color: #2E8B57; 
-        font-weight: bold; 
-        border: 1px solid #2E8B57;
-        border-radius: 10px;
+    /* Main Background: Deep Charcoal */
+    .stApp { 
+        background-color: #0E1117; 
+        color: #FFFFFF;
     }
-    .stSuccess { background-color: #C1E1C1; color: #006400; }
-    [data-testid="stMetricValue"] { color: #483D8B; }
-    div[data-testid="column"] {
-        padding: 15px;
+    
+    /* Headings: Clean White */
+    h1, h2, h3 { 
+        color: #FFFFFF !important; 
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Subtle Glassmorphism for Columns/Cards */
+    div[data-testid="column"], div[data-testid="stVerticalBlock"] > div[style*="border"] {
+        background: rgba(255, 255, 255, 0.05); /* Very transparent white */
+        backdrop-filter: blur(10px); /* The "Frosted" effect */
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 15px;
-        background-color: rgba(255, 255, 255, 0.4);
+        padding: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* Emerald Buttons */
+    .stButton>button { 
+        background-color: #50C878; /* Emerald Green */
+        color: #0E1117 !important; /* Dark text on bright button for contrast */
+        font-weight: bold; 
+        border: none;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    /* Button Hover Effect */
+    .stButton>button:hover {
+        background-color: #2E8B57; /* Sea Green on hover */
+        color: #FFFFFF !important;
+        box-shadow: 0px 0px 15px rgba(80, 200, 120, 0.4);
+    }
+
+    /* Input Fields Styling */
+    .stTextInput>div>div>input, .stSelectbox>div>div>div {
+        background-color: #1A1C23 !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* Sidebar Dark Theme */
+    [data-testid="stSidebar"] {
+        background-color: #050505;
+    }
+
+    /* Metric Values */
+    [data-testid="stMetricValue"] {
+        color: #50C878 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -384,9 +426,11 @@ def library_system():
                 st.divider()
                 
                 # Visualizing inventory by genre
+                # Change this line in your Dashboard logic
                 fig = px.bar(df, x='genre', color='status', 
-                             title="Inventory by Category",
-                             labels={'genre': 'Book Genre', 'status': 'Availability'})
+                        template="plotly_dark", # <--- Add this!
+                        title="Inventory by Category",
+                        color_discrete_map={'available': '#50C878', 'borrowed': '#FF4B4B'})
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No data available yet. Add some books to see stats!")
