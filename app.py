@@ -117,13 +117,22 @@ def library_system():
     else:
         menu = ["Home", "View All Books", "Borrow Book", "Return Book", "Recommendation"]
 
+    # --- 4.5 SAFE MENU SELECTION ---
     if "menu_choice" not in st.session_state:
         st.session_state.menu_choice = "Home"
 
-    # Selectbox driven by session state
-    choice = st.sidebar.selectbox("Menu", menu, index=menu.index(st.session_state.menu_choice))
-    st.session_state.menu_choice = choice
+    # CRITICAL: Check if the saved choice exists in the current role's menu
+    # This prevents the ValueError when switching roles
+    if st.session_state.menu_choice not in menu:
+        st.session_state.menu_choice = "Home"
 
+    # Now we can safely find the index
+    choice_index = menu.index(st.session_state.menu_choice)
+    
+    choice = st.sidebar.selectbox("Menu", menu, index=choice_index)
+    
+    # Update the session state for the next rerun
+    st.session_state.menu_choice = choice
     # --- 5. PAGE ROUTING ---
     
     # HOME PAGE (Quick Actions)
