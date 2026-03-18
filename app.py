@@ -47,18 +47,25 @@ st.markdown("""
         padding: 20px;
     }
 
-    /* 4. EMERALD BUTTONS */
+    /* 4. EMERALD BUTTONS WITH BLACK TEXT */
     .stButton>button { 
         background-color: #50C878 !important; 
-        color: #0E1117 !important; 
-        font-weight: bold; 
-        border: none; border-radius: 10px;
-        transition: 0.3s; width: 100%;
+        color: #000000 !important; /* FORCED BLACK TEXT */
+        font-weight: 800 !important; /* EXTRA BOLD FOR READABILITY */
+        border: none; 
+        border-radius: 10px;
+        transition: 0.3s; 
+        width: 100%;
+        text-transform: uppercase; /* OPTIONAL: Makes it look like a pro UI */
+        letter-spacing: 1px;
     }
+
+    /* Button Hover Effect */
     .stButton>button:hover {
-        background-color: #FFFFFF !important;
-        color: #50C878 !important;
-        box-shadow: 0px 0px 15px rgba(80, 200, 120, 0.4);
+        background-color: #FFFFFF !important; /* TURNS WHITE ON HOVER */
+        color: #000000 !important; /* TEXT STAYS BLACK */
+        box-shadow: 0px 0px 20px rgba(80, 200, 120, 0.6);
+        transform: scale(1.02); /* SUBTLE POP EFFECT */
     }
 
     /* 5. SIDEBAR & NAVIGATION FIX (Kills the white box) */
