@@ -146,7 +146,27 @@ st.markdown("""
         background-color: #FFFFFF !important; 
         border: 1px solid #50C878 !important; /* Emerald border for style */
     }
+    
+            
 
+    /* 4. EMERALD BUTTONS: FORCED BLACK TEXT */
+    .stButton>button { 
+        background-color: #50C878 !important; 
+        color: #000000 !important; /* <--- This forces the text to Black */
+        font-weight: 800 !important; /* Bold makes it easier to read */
+        border: none !important;
+        border-radius: 10px !important;
+        transition: 0.3s ease;
+    }
+
+    /* Keep text black even when hovering */
+    .stButton>button:hover {
+        background-color: #FFFFFF !important; /* Button turns white */
+        color: #000000 !important; /* Text STAYS black */
+        box-shadow: 0px 0px 15px rgba(80, 200, 120, 0.6);
+        transform: translateY(-2px);
+    }
+    
     /* Hover state for dropdown items */
     div[data-baseweb="popover"] li:hover {
         background-color: #50C878 !important; /* Emerald highlight */
