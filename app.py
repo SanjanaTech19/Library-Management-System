@@ -274,19 +274,36 @@ def library_system():
                 conn.close()
 
     # DASHBOARD (Admin Only)
+    # DASHBOARD (Admin Only)
     elif choice == "Dashboard":
         st.subheader("📊 Analytics Overview")
         conn = get_db_connection()
         if conn:
+            # We fetch all books to calculate stats
             df = pd.read_sql("SELECT * FROM books", conn)
+            
             if not df.empty:
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Total Titles", len(df))
-                m2.metric("On Loan", len(df[df['status'] == 'borrowed']))
-                m3.metric("Fines Collected (Est)", f"₹{df['fine'].sum()}")
+                # Calculate metrics
+                total_titles = len(df)
+                on_loan = len(df[df['status'] == 'borrowed'])
                 
-                fig = px.bar(df, x='genre', color='status', title="Inventory by Category")
+                # IMPORTANT: Ensure 'fine' column is treated as a number
+                # We use .sum() to get the total collected/pending fines
+                total_fines = df['fine'].sum() if 'fine' in df.columns else 0
+                
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Total Titles", total_titles)
+                m2.metric("On Loan", on_loan)
+                m3.metric("Total Fines (₹)", f"₹{total_fines}")
+                
+                # Visualizing the data
+                st.divider()
+                fig = px.bar(df, x='genre', color='status', 
+                             title="Inventory by Category",
+                             labels={'genre': 'Book Genre', 'status': 'Availability'})
                 st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No data available to display yet. Add some books first!")
             conn.close()
 
     # REVIEW SUGGESTIONS (Admin Only)
