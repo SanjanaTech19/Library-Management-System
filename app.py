@@ -285,36 +285,24 @@ def library_system():
         else:
             st.success("✅ On-time return! No fine applicable.")
 
-        if st.button("Complete Return Process", use_container_width=True):
-            if not book_to_return:
-                st.error("Please enter the book title.")
-            else:
-                conn = get_db_connection()
-                if conn:
-                    cursor = conn.cursor()
-                    try:
-                        # Update: Increase copies, set status available, and ADD to the fine column
-                        cursor.execute("""
-                            UPDATE books 
-                            SET status = 'available', 
-                                copies = copies + 1, 
-                                fine = fine + %s 
-                            WHERE title = %s
-                        """, (fine, book_to_return))
-                        
-                        if cursor.rowcount > 0:
-                            conn.commit()
-                            st.success(f"Successfully returned '{book_to_return}'!")
-                            if fine > 0:
-                                st.info(f"Fine of ₹{fine} has been recorded in the system.")
-                            # Clear selection
-                            st.session_state.selected_book_title = ""
-                        else:
-                            st.error("Book title not found in records.")
-                    except Exception as e:
-                        st.error(f"Error updating database: {e}")
-                    finally:
-                        conn.close()
+        if st.button("Complete Return Process"):
+            conn = get_db_connection()
+            if conn:
+                cursor = conn.cursor()
+        # We MUST set status to 'available' AND increment copies
+                cursor.execute("""
+            UPDATE books 
+            SET status = 'available', 
+                copies = copies + 1, 
+                fine = fine + %s 
+            WHERE title = %s
+        """, (fine, book_to_return))
+        
+        conn.commit()
+        conn.close()
+        st.success(f"Return successful! {book_to_return} is now available.")
+        st.session_state.selected_book_title = ""
+        st.rerun()
 
     
     # VIEW ALL BOOKS
