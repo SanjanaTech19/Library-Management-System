@@ -28,92 +28,80 @@ st.set_page_config(page_title="The Reading Nook", page_icon="📚", layout="wide
 
 st.markdown("""
     <style>
-    /* 1. Main App Background & Base Text */
+    /* 1. Main Background */
     .stApp { 
         background-color: #0E1117; 
         color: #FFFFFF;
     }
 
-    /* 2. Headings & Titles */
-    h1, h2, h3, h4, h5, h6 { 
-        color: #FFFFFF !important; 
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* 3. FIX: Form Labels & Widget Labels (Invisible Text Fix) */
-    label, .stWidgetLabel, [data-testid="stWidgetLabel"] p, .st-ae {
+    /* 2. FORCE ALL LABELS TO WHITE (Fixes Add Book visibility) */
+    /* This targets every possible label type in Streamlit */
+    label, 
+    .stWidgetLabel, 
+    [data-testid="stWidgetLabel"] p, 
+    .st-ae, 
+    .st-af, 
+    .st-ag,
+    div[data-baseweb="input"] label {
         color: #FFFFFF !important;
         font-weight: 600 !important;
         font-size: 1.1rem !important;
+        opacity: 1 !important;
     }
 
-    /* 4. Glassmorphism Cards/Columns */
-    div[data-testid="column"], [data-testid="stVerticalBlock"] > div[style*="border"] {
-        background: rgba(255, 255, 255, 0.05); 
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+    /* 3. Sidebar Text Visibility */
+    [data-testid="stSidebar"] .stMarkdown p, 
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebarNav"] span {
+        color: #FFFFFF !important;
+    }
+
+    /* 4. Glassmorphism Cards */
+    div[data-testid="column"], 
+    div[data-testid="stVerticalBlock"] > div[style*="border"] {
+        background: rgba(255, 255, 255, 0.07) !important; 
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 15px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
 
     /* 5. Emerald Green Buttons */
     .stButton>button { 
         background-color: #50C878 !important; 
         color: #0E1117 !important; 
-        font-weight: bold; 
-        border: none;
-        border-radius: 10px;
-        padding: 0.5rem 1rem;
-        transition: all 0.3s ease;
+        font-weight: bold !important; 
+        border: none !important;
+        border-radius: 10px !important;
         width: 100%;
+        height: 3em;
     }
 
-    /* Button Hover Effect */
+    /* Button Hover */
     .stButton>button:hover {
         background-color: #FFFFFF !important;
         color: #50C878 !important;
         box-shadow: 0px 0px 20px rgba(80, 200, 120, 0.6);
-        transform: translateY(-2px);
     }
 
-    /* 6. Inputs & Selectboxes */
-    .stTextInput>div>div>input, .stSelectbox>div>div>div, .stNumberInput>div>div>input {
-        background-color: #1A1C23 !important;
+    /* 6. Fix for Input Field Text */
+    input {
         color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 8px !important;
-    }
-
-    /* 7. Sidebar Styling */
-    [data-testid="stSidebar"] {
-        background-color: #050505 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* Sidebar Text Fix */
-    [data-testid="stSidebar"] .stMarkdown p, [data-testid="stSidebar"] label {
-        color: #FFFFFF !important;
-    }
-
-    /* 8. Metrics (Dashboard Stats) */
+    /* 7. Metric Styling */
     [data-testid="stMetricValue"] {
         color: #50C878 !important;
-        font-weight: bold;
     }
     [data-testid="stMetricLabel"] {
         color: #A0A0A0 !important;
     }
 
-    /* 9. Captions & Secondary Text */
-    .stCaption, p, span {
-        color: #E0E0E0 !important;
-    }
-
-    /* 10. Divider Color */
-    hr {
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    /* 8. Fix for Selectbox (Menu) visibility */
+    div[data-baseweb="select"] > div {
+        background-color: #1A1C23 !important;
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
