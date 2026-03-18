@@ -10,11 +10,11 @@ from datetime import datetime, date
 def get_db_connection():
     try:
         return mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            port=int(os.getenv("DB_PORT", 18525))
+            host=st.secrets["DB_HOST"],
+            user=st.secrets["DB_USER"],
+            password=st.secrets["DB_PASSWORD"],
+            port=int(st.secrets["DB_PORT"]),
+            database=st.secrets["DB_NAME"]
         )
     except Exception as e:
         st.error(f"⚠️ Database Connection Error: {e}")
