@@ -323,11 +323,12 @@ def library_system():
 
     # DASHBOARD (Admin Only)
     # DASHBOARD (Admin Only)
+    # DASHBOARD (Admin Only)
     elif choice == "Dashboard":
         st.subheader("📊 Analytics Overview")
         conn = get_db_connection()
         if conn:
-            # We fetch all books to calculate stats
+            # Fetch all books to calculate stats
             df = pd.read_sql("SELECT * FROM books", conn)
             
             if not df.empty:
@@ -335,23 +336,24 @@ def library_system():
                 total_titles = len(df)
                 on_loan = len(df[df['status'] == 'borrowed'])
                 
-                # IMPORTANT: Ensure 'fine' column is treated as a number
-                # We use .sum() to get the total collected/pending fines
+                # Ensure 'fine' column exists and treat it as a number
+                # This sums up all values in the fine column
                 total_fines = df['fine'].sum() if 'fine' in df.columns else 0
                 
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Total Titles", total_titles)
                 m2.metric("On Loan", on_loan)
-                m3.metric("Total Fines (₹)", f"₹{total_fines}")
+                m3.metric("Total Fines Collected (₹)", f"₹{total_fines}")
                 
-                # Visualizing the data
                 st.divider()
+                
+                # Visualizing inventory by genre
                 fig = px.bar(df, x='genre', color='status', 
                              title="Inventory by Category",
                              labels={'genre': 'Book Genre', 'status': 'Availability'})
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("No data available to display yet. Add some books first!")
+                st.info("No data available yet. Add some books to see stats!")
             conn.close()
 
     # REVIEW SUGGESTIONS (Admin Only)
