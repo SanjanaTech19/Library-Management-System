@@ -289,7 +289,7 @@ def library_system():
             conn = get_db_connection()
             if conn:
                 cursor = conn.cursor()
-        # We MUST set status to 'available' AND increment copies
+        
                 cursor.execute("""
             UPDATE books 
             SET status = 'available', 
@@ -298,11 +298,11 @@ def library_system():
             WHERE title = %s
         """, (fine, book_to_return))
         
-        conn.commit()
-        conn.close()
-        st.success(f"Return successful! {book_to_return} is now available.")
-        st.session_state.selected_book_title = ""
-        st.rerun()
+                conn.commit()
+                conn.close()
+                st.success(f"Return successful! {book_to_return} is now available.")
+                st.session_state.selected_book_title = ""
+                st.rerun()
 
     
     # VIEW ALL BOOKS
@@ -332,6 +332,15 @@ def library_system():
                             st.session_state.selected_book_title = row['title']
                             st.session_state.menu_choice = "Return Book"
                             st.rerun()
+                
+                    elif user_role == "admin":
+                        if col_btn2.button("🗑️ Delete", key=f"del_{book_id}"):
+                            cursor = conn.cursor()
+                            cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
+                            conn.commit()
+                            st.toast(f"Deleted {row['title']}")
+                            st.rerun()
+                
                 st.divider()
             conn.close()
     # RECOMMENDATION
