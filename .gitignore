@@ -1,0 +1,36 @@
+# --- SECURITY & SECRETS ---
+# This is the most important line - it hides your database credentials!
+.env
+database.py # Only include this if you have hardcoded passwords in it
+
+# --- PYTHON SETTINGS ---
+# Ignore the virtual environment folder
+venv/
+.venv/
+env/
+bin/
+lib/
+include/
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- STREAMLIT & IDE ---
+# Ignore Streamlit's local configuration
+.streamlit/config.toml
+
+# Ignore VS Code settings (optional, but keeps repo clean)
+.vscode/
+.DS_Store
+
+# --- DATA & LOGS ---
+# If you eventually use the Wake-Streamer datasets, ignore large parquet files
+*.parquet
+*.csv
+*.log
+
+# Ignore test scripts with hardcoded passwords
+test_connection.py
