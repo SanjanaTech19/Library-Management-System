@@ -113,7 +113,7 @@ def library_system():
     st.sidebar.divider()
     
     if user_role == "admin":
-        menu = ["Home", "Dashboard", "Add Book", "Borrow Book", "Return Book", "View All Books", "Review Suggestions"]
+        menu = ["Home", "Dashboard", "Add Book", "View All Books", "Review Suggestions"]
     else:
         menu = ["Home", "View All Books", "Borrow Book", "Return Book", "Recommendation"]
 
