@@ -105,6 +105,26 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
     }
 
+    /* FIX: Navigation Dropdown (The white box) Text */
+    div[data-baseweb="popover"] ul, 
+    div[data-baseweb="menu"] {
+        background-color: #FFFFFF !important; /* Keeps the box white */
+    }
+
+    /* Target the actual text inside the list items */
+    div[data-baseweb="popover"] li, 
+    div[data-baseweb="popover"] span,
+    div[role="listbox"] div {
+        color: #000000 !important; /* FORCES TEXT TO BLACK */
+        font-weight: 500 !important;
+    }
+
+    /* Add a nice hover effect so you know which one you are picking */
+    div[data-baseweb="popover"] li:hover {
+        background-color: #50C878 !important; /* Emerald green highlight */
+        color: #000000 !important;
+    }
+            
     /* 7. CAPTIONS & METRICS */
     .stCaption, p { color: #E0E0E0 !important; }
     [data-testid="stMetricValue"] { color: #50C878 !important; }
