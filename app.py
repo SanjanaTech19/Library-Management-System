@@ -219,104 +219,132 @@ def library_system():
                         conn.close()
 
     # BORROW BOOK
+    # BORROW BOOK
     elif choice == "Borrow Book":
-        st.subheader("📖 Borrow a Book")
-        book_title = st.text_input("Search Title to Borrow")
-        student_name = st.text_input("Borrower Name", value=username)
+        st.subheader("📖 Issue a Book")
         
-        if st.button("Confirm Borrow"):
-            conn = get_db_connection()
-            if conn:
-                cursor = conn.cursor()
-                cursor.execute("UPDATE books SET status='borrowed' WHERE title=%s AND status='available'", (book_title,))
-                if cursor.rowcount > 0:
-                    conn.commit()
-                    st.success(f"Confirmed: {book_title} issued to {student_name}.")
+        # 1. Pull the selected book from Catalog if it exists
+        selected_title = st.session_state.get('selected_book_title', "")
+        
+        with st.form("borrow_form"):
+            book_title = st.text_input("Book Title", value=selected_title)
+            student_name = st.text_input("Borrower Name", value=username)
+            borrow_date = st.date_input("Borrow Date", value=date.today())
+            submit_borrow = st.form_submit_button("Confirm Issue")
+            
+            if submit_borrow:
+                if not book_title or not student_name:
+                    st.error("Please fill in all details.")
                 else:
-                    st.error("Book not available or title mismatch.")
-                conn.close()
+                    conn = get_db_connection()
+                    if conn:
+                        cursor = conn.cursor()
+                        # Check if book exists and has copies
+                        cursor.execute("SELECT copies FROM books WHERE title=%s", (book_title,))
+                        result = cursor.fetchone()
+                        
+                        if result and result[0] > 0:
+                            # Update: Reduce copies and mark as borrowed if last copy
+                            new_status = 'borrowed' if result[0] == 1 else 'available'
+                            cursor.execute("""
+                                UPDATE books 
+                                SET copies = copies - 1, status = %s 
+                                WHERE title = %s
+                            """, (new_status, book_title))
+                            
+                            conn.commit()
+                            st.success(f"✅ {book_title} has been issued to {student_name}!")
+                            st.balloons()
+                            # Clear the selection so it doesn't stay stuck
+                            st.session_state.selected_book_title = ""
+                        else:
+                            st.error("Sorry, this book is currently Out of Stock.")
+                        conn.close()
 
     # RETURN BOOK
+    # RETURN BOOK
     elif choice == "Return Book":
-        st.subheader("🔄 Return & Fine Calculation")
-        book_to_return = st.text_input("Title to Return")
-        due_date = st.date_input("Due Date")
-        return_date = st.date_input("Return Date", value=date.today())
+        st.subheader("🔄 Return & Fine Management")
+        
+        selected_title = st.session_state.get('selected_book_title', "")
+        
+        book_to_return = st.text_input("Title to Return", value=selected_title)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            due_date = st.date_input("Due Date (See your slip)")
+        with col2:
+            return_date = st.date_input("Return Date", value=date.today())
 
-        if st.button("Complete Return"):
-            fine = 0
-            if return_date > due_date:
-                days_late = (return_date - due_date).days
-                fine = days_late * 20
-                st.warning(f"Late Return detected. Fine: ₹{fine}")
+        # --- INSTANT FINE CALCULATION ---
+        fine = 0
+        if return_date > due_date:
+            days_late = (return_date - due_date).days
+            fine = days_late * 20  # ₹20 per day
+            st.warning(f"⚠️ Late Return: {days_late} days overdue. Calculated Fine: ₹{fine}")
+        else:
+            st.success("✅ On-time return! No fine applicable.")
 
-            conn = get_db_connection()
-            if conn:
-                cursor = conn.cursor()
-                cursor.execute("UPDATE books SET status='available', fine=%s WHERE title=%s", (fine, book_to_return))
-                conn.commit()
-                st.success(f"'{book_to_return}' returned successfully!")
-                conn.close()
+        if st.button("Complete Return Process", use_container_width=True):
+            if not book_to_return:
+                st.error("Please enter the book title.")
+            else:
+                conn = get_db_connection()
+                if conn:
+                    cursor = conn.cursor()
+                    try:
+                        # Update: Increase copies, set status available, and ADD to the fine column
+                        cursor.execute("""
+                            UPDATE books 
+                            SET status = 'available', 
+                                copies = copies + 1, 
+                                fine = fine + %s 
+                            WHERE title = %s
+                        """, (fine, book_to_return))
+                        
+                        if cursor.rowcount > 0:
+                            conn.commit()
+                            st.success(f"Successfully returned '{book_to_return}'!")
+                            if fine > 0:
+                                st.info(f"Fine of ₹{fine} has been recorded in the system.")
+                            # Clear selection
+                            st.session_state.selected_book_title = ""
+                        else:
+                            st.error("Book title not found in records.")
+                    except Exception as e:
+                        st.error(f"Error updating database: {e}")
+                    finally:
+                        conn.close()
 
-    # VIEW ALL BOOKS
-    # VIEW ALL BOOKS
+    
     # VIEW ALL BOOKS
     elif choice == "View All Books":
         st.subheader("📚 Library Catalog")
-        search = st.text_input("🔍 Search by Title or Author...")
-        
+        search = st.text_input("🔍 Search...")
         conn = get_db_connection()
         if conn:
-            query = "SELECT * FROM books"
-            if search:
-                query += " WHERE title LIKE %s OR author LIKE %s"
-                df = pd.read_sql(query, conn, params=(f'%{search}%', f'%{search}%'))
-            else:
-                df = pd.read_sql(query, conn)
+            df = pd.read_sql("SELECT * FROM books", conn) # Add WHERE filters if needed
+            for index, row in df.iterrows():
+                book_id = row.get('id') or row.get('ID')
+                with st.container():
+                    col_info, col_btn1, col_btn2 = st.columns([4, 1, 1])
+                    with col_info:
+                        st.write(f"**{row['title']}** | {row['author']}")
+                        st.caption(f"Copies: {row.get('copies', 0)} | Status: {row['status']}")
 
-            if df.empty:
-                st.info("No books found. Try a different search!")
-            else:
-                for index, row in df.iterrows():
-                    book_id = row.get('id') or row.get('ID')
-                    num_copies = row.get('copies', 0)
-                    
-                    with st.container():
-                        # Layout: Book Info | Action Column (User or Admin)
-                        col_info, col_action = st.columns([5, 1])
+                    if user_role == "user":
+                        # BORROW BUTTON
+                        if col_btn1.button("Borrow", key=f"br_{book_id}", disabled=(row.get('copies', 0) <= 0)):
+                            st.session_state.selected_book_title = row['title']
+                            st.session_state.menu_choice = "Borrow Book"
+                            st.rerun()
                         
-                        with col_info:
-                            st.write(f"**{row['title']}** | {row['author']}")
-                            
-                            # Shared Info: Genre, ISBN, and Stock
-                            st.caption(f"Genre: {row['genre']} | ISBN: {row['isbn']}")
-                            
-                            # Visual stock indicator
-                            if num_copies > 0:
-                                st.markdown(f"📦 **Stock Level:** {num_copies} copies available")
-                            else:
-                                st.markdown("⚠️ **OUT OF STOCK**", help="No physical copies remaining in the library.")
-
-                        with col_action:
-                            # --- ADMIN ACTION ---
-                            if user_role == "admin":
-                                if st.button("🗑️ Delete", key=f"del_{book_id}", use_container_width=True):
-                                    cursor = conn.cursor()
-                                    cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
-                                    conn.commit()
-                                    st.toast(f"Deleted {row['title']}")
-                                    st.rerun()
-                            
-                            # --- USER ACTION ---
-                            elif user_role == "user":
-                                if num_copies > 0 and row['status'] == 'available':
-                                    if st.button("Borrow", key=f"borrow_{book_id}", use_container_width=True):
-                                        st.session_state.menu_choice = "Borrow Book"
-                                        st.rerun()
-                                else:
-                                    st.button("N/A", key=f"na_{book_id}", disabled=True, use_container_width=True)
-                        
-                    st.divider()
+                        # RETURN BUTTON
+                        if col_btn2.button("Return", key=f"ret_{book_id}"):
+                            st.session_state.selected_book_title = row['title']
+                            st.session_state.menu_choice = "Return Book"
+                            st.rerun()
+                st.divider()
             conn.close()
     # RECOMMENDATION
     elif choice == "Recommendation":
