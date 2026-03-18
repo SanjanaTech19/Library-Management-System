@@ -23,86 +23,84 @@ def get_db_connection():
 # --- 2. PAGE CONFIG & STYLING ---
 st.set_page_config(page_title="The Reading Nook", page_icon="📚", layout="wide")
 
-# --- 2. PAGE CONFIG & STYLING ---
-st.set_page_config(page_title="The Reading Nook", page_icon="📚", layout="wide")
+
 
 st.markdown("""
     <style>
-    /* 1. Main Background */
-    .stApp { 
-        background-color: #0E1117; 
-        color: #FFFFFF;
-    }
-
-    /* 2. FORCE ALL LABELS TO WHITE (Fixes Add Book visibility) */
-    /* This targets every possible label type in Streamlit */
-    label, 
-    .stWidgetLabel, 
-    [data-testid="stWidgetLabel"] p, 
-    .st-ae, 
-    .st-af, 
-    .st-ag,
-    div[data-baseweb="input"] label {
+    /* 1. GLOBAL APP & TEXT COLORS */
+    .stApp { background-color: #0E1117; color: #FFFFFF; }
+    h1, h2, h3, h4, h5, h6 { color: #FFFFFF !important; }
+    
+    /* 2. FIX INVISIBLE LABELS (Add Book Form etc.) */
+    label, .stWidgetLabel, [data-testid="stWidgetLabel"] p {
         color: #FFFFFF !important;
         font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        opacity: 1 !important;
+        font-size: 1rem !important;
     }
 
-    /* 3. Sidebar Text Visibility */
-    [data-testid="stSidebar"] .stMarkdown p, 
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebarNav"] span {
-        color: #FFFFFF !important;
-    }
-
-    /* 4. Glassmorphism Cards */
-    div[data-testid="column"], 
-    div[data-testid="stVerticalBlock"] > div[style*="border"] {
-        background: rgba(255, 255, 255, 0.07) !important; 
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+    /* 3. GLASSMORPHISM CARDS */
+    div[data-testid="column"], [data-testid="stVerticalBlock"] > div[style*="border"] {
+        background: rgba(255, 255, 255, 0.05); 
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 15px;
         padding: 20px;
-        margin-bottom: 15px;
     }
 
-    /* 5. Emerald Green Buttons */
+    /* 4. EMERALD BUTTONS */
     .stButton>button { 
         background-color: #50C878 !important; 
         color: #0E1117 !important; 
-        font-weight: bold !important; 
-        border: none !important;
-        border-radius: 10px !important;
-        width: 100%;
-        height: 3em;
+        font-weight: bold; 
+        border: none; border-radius: 10px;
+        transition: 0.3s; width: 100%;
     }
-
-    /* Button Hover */
     .stButton>button:hover {
         background-color: #FFFFFF !important;
         color: #50C878 !important;
-        box-shadow: 0px 0px 20px rgba(80, 200, 120, 0.6);
+        box-shadow: 0px 0px 15px rgba(80, 200, 120, 0.4);
     }
 
-    /* 6. Fix for Input Field Text */
-    input {
-        color: white !important;
+    /* 5. SIDEBAR & NAVIGATION FIX (Kills the white box) */
+    [data-testid="stSidebar"] {
+        background-color: #050505 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* 7. Metric Styling */
-    [data-testid="stMetricValue"] {
-        color: #50C878 !important;
-    }
-    [data-testid="stMetricLabel"] {
-        color: #A0A0A0 !important;
+    /* This targets the dropdown list itself */
+    div[data-baseweb="popover"], div[data-baseweb="menu"] {
+        background-color: #1A1C23 !important;
     }
 
-    /* 8. Fix for Selectbox (Menu) visibility */
-    div[data-baseweb="select"] > div {
+    /* This targets the items inside the dropdown */
+    div[data-baseweb="popover"] li {
         background-color: #1A1C23 !important;
         color: white !important;
     }
+
+    /* Hover effect for dropdown items */
+    div[data-baseweb="popover"] li:hover {
+        background-color: #50C878 !important;
+        color: #0E1117 !important;
+    }
+
+    /* Fix sidebar selectbox background */
+    div[data-testid="stSidebar"] .stSelectbox > div > div {
+        background-color: #1A1C23 !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* 6. INPUT FIELDS */
+    .stTextInput>div>div>input, .stSelectbox>div>div>div, .stNumberInput>div>div>input {
+        background-color: #1A1C23 !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* 7. CAPTIONS & METRICS */
+    .stCaption, p { color: #E0E0E0 !important; }
+    [data-testid="stMetricValue"] { color: #50C878 !important; }
     </style>
     """, unsafe_allow_html=True)
 
