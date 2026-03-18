@@ -260,13 +260,13 @@ def library_system():
 
     # VIEW ALL BOOKS
     # VIEW ALL BOOKS
+    # VIEW ALL BOOKS
     elif choice == "View All Books":
         st.subheader("📚 Library Catalog")
         search = st.text_input("🔍 Search by Title or Author...")
         
         conn = get_db_connection()
         if conn:
-            # Safe SQL Query using parameters to prevent injection
             query = "SELECT * FROM books"
             if search:
                 query += " WHERE title LIKE %s OR author LIKE %s"
@@ -278,36 +278,46 @@ def library_system():
                 st.info("No books found. Try a different search!")
             else:
                 for index, row in df.iterrows():
-                    # Handle the 'id' vs 'ID' column name issue safely
                     book_id = row.get('id') or row.get('ID')
+                    num_copies = row.get('copies', 0)
                     
                     with st.container():
-                        # Create 3 columns: Info | Borrow (Student) | Delete (Admin)
-                        col_info, col_user, col_admin = st.columns([4, 1, 1])
+                        # Layout: Book Info | Action Column (User or Admin)
+                        col_info, col_action = st.columns([5, 1])
                         
                         with col_info:
                             st.write(f"**{row['title']}** | {row['author']}")
-                            st.caption(f"Genre: {row['genre']} | Status: {row['status']} | ISBN: {row['isbn']}")
-                        
-                        # --- STUDENT ACTION ---
-                        with col_user:
-                            if user_role == "user" and row['status'] == 'available':
-                                if st.button("Borrow", key=f"borrow_{book_id}"):
-                                    st.session_state.menu_choice = "Borrow Book"
-                                    st.rerun()
-                        
-                        # --- ADMIN ACTION ---
-                        with col_admin:
+                            
+                            # Shared Info: Genre, ISBN, and Stock
+                            st.caption(f"Genre: {row['genre']} | ISBN: {row['isbn']}")
+                            
+                            # Visual stock indicator
+                            if num_copies > 0:
+                                st.markdown(f"📦 **Stock Level:** {num_copies} copies available")
+                            else:
+                                st.markdown("⚠️ **OUT OF STOCK**", help="No physical copies remaining in the library.")
+
+                        with col_action:
+                            # --- ADMIN ACTION ---
                             if user_role == "admin":
-                                if st.button("🗑️ Delete", key=f"del_{book_id}"):
+                                if st.button("🗑️ Delete", key=f"del_{book_id}", use_container_width=True):
                                     cursor = conn.cursor()
                                     cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
                                     conn.commit()
-                                    st.toast(f"Removed {row['title']} from inventory.")
+                                    st.toast(f"Deleted {row['title']}")
                                     st.rerun()
+                            
+                            # --- USER ACTION ---
+                            elif user_role == "user":
+                                if num_copies > 0 and row['status'] == 'available':
+                                    if st.button("Borrow", key=f"borrow_{book_id}", use_container_width=True):
+                                        st.session_state.menu_choice = "Borrow Book"
+                                        st.rerun()
+                                else:
+                                    st.button("N/A", key=f"na_{book_id}", disabled=True, use_container_width=True)
+                        
                     st.divider()
             conn.close()
-
     # RECOMMENDATION
     elif choice == "Recommendation":
         st.subheader("⭐ Suggest a Purchase")
