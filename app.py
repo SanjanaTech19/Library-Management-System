@@ -261,13 +261,13 @@ def library_system():
                             st.error("Sorry, this book is currently Out of Stock.")
                         conn.close()
 
-    # RETURN BOOK
-    # RETURN BOOK
+    
+    
+    
     elif choice == "Return Book":
         st.subheader("🔄 Return & Fine Management")
         
         selected_title = st.session_state.get('selected_book_title', "")
-        
         book_to_return = st.text_input("Title to Return", value=selected_title)
         
         col1, col2 = st.columns(2)
@@ -276,33 +276,34 @@ def library_system():
         with col2:
             return_date = st.date_input("Return Date", value=date.today())
 
-        # --- INSTANT FINE CALCULATION ---
         fine = 0
         if return_date > due_date:
             days_late = (return_date - due_date).days
-            fine = days_late * 20  # ₹20 per day
-            st.warning(f"⚠️ Late Return: {days_late} days overdue. Calculated Fine: ₹{fine}")
-        else:
-            st.success("✅ On-time return! No fine applicable.")
+            fine = days_late * 20
+            st.warning(f"⚠️ Overdue: ₹{fine} fine.")
 
         if st.button("Complete Return Process"):
             conn = get_db_connection()
-            if conn:
+            if conn: # All DB logic MUST stay inside this block
                 cursor = conn.cursor()
-        
-                cursor.execute("""
-            UPDATE books 
-            SET status = 'available', 
-                copies = copies + 1, 
-                fine = fine + %s 
-            WHERE title = %s
-        """, (fine, book_to_return))
-        
-                conn.commit()
-                conn.close()
-                st.success(f"Return successful! {book_to_return} is now available.")
-                st.session_state.selected_book_title = ""
-                st.rerun()
+                try:
+                    # Update status AND increment copies so the Borrow button enables
+                    cursor.execute("""
+                        UPDATE books 
+                        SET status = 'available', 
+                            copies = copies + 1, 
+                            fine = fine + %s 
+                        WHERE title = %s
+                    """, (fine, book_to_return))
+                    
+                    conn.commit()
+                    st.success(f"✅ {book_to_return} returned!")
+                    st.session_state.selected_book_title = ""
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"DB Update Failed: {e}")
+                finally:
+                    conn.close()
 
     
     # VIEW ALL BOOKS
