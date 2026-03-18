@@ -259,30 +259,53 @@ def library_system():
                 conn.close()
 
     # VIEW ALL BOOKS
+    # VIEW ALL BOOKS
     elif choice == "View All Books":
         st.subheader("📚 Library Catalog")
-        search = st.text_input("🔍 Search books...")
+        search = st.text_input("🔍 Search by Title or Author...")
         
         conn = get_db_connection()
         if conn:
+            # Safe SQL Query using parameters to prevent injection
             query = "SELECT * FROM books"
             if search:
-                query += f" WHERE title LIKE '%{search}%' OR author LIKE '%{search}%'"
-            
-            df = pd.read_sql(query, conn)
-            for index, row in df.iterrows():
-                book_id = row.get('id') or row.get('ID') or row.get('book_id')
-    
-                with st.container():
-                    c1, c2 = st.columns([5, 1])
-                    c1.write(f"**{row['title']}** | {row['author']} ({row['genre']})")
-                    c1.caption(f"Status: {row['status']} | ISBN: {row['isbn']}")
-        
-                    if row['status'] == 'available':
-                        if c2.button("Select", key=f"sel_{book_id}"):
-                            st.session_state.menu_choice = "Borrow Book"
-                            st.rerun()
-            st.divider()
+                query += " WHERE title LIKE %s OR author LIKE %s"
+                df = pd.read_sql(query, conn, params=(f'%{search}%', f'%{search}%'))
+            else:
+                df = pd.read_sql(query, conn)
+
+            if df.empty:
+                st.info("No books found. Try a different search!")
+            else:
+                for index, row in df.iterrows():
+                    # Handle the 'id' vs 'ID' column name issue safely
+                    book_id = row.get('id') or row.get('ID')
+                    
+                    with st.container():
+                        # Create 3 columns: Info | Borrow (Student) | Delete (Admin)
+                        col_info, col_user, col_admin = st.columns([4, 1, 1])
+                        
+                        with col_info:
+                            st.write(f"**{row['title']}** | {row['author']}")
+                            st.caption(f"Genre: {row['genre']} | Status: {row['status']} | ISBN: {row['isbn']}")
+                        
+                        # --- STUDENT ACTION ---
+                        with col_user:
+                            if user_role == "user" and row['status'] == 'available':
+                                if st.button("Borrow", key=f"borrow_{book_id}"):
+                                    st.session_state.menu_choice = "Borrow Book"
+                                    st.rerun()
+                        
+                        # --- ADMIN ACTION ---
+                        with col_admin:
+                            if user_role == "admin":
+                                if st.button("🗑️ Delete", key=f"del_{book_id}"):
+                                    cursor = conn.cursor()
+                                    cursor.execute("DELETE FROM books WHERE id = %s", (book_id,))
+                                    conn.commit()
+                                    st.toast(f"Removed {row['title']} from inventory.")
+                                    st.rerun()
+                    st.divider()
             conn.close()
 
     # RECOMMENDATION
