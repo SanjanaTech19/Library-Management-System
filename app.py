@@ -6,7 +6,7 @@ import os
 from datetime import datetime, date
 
 # --- 1. DATABASE CONNECTION ---
-@st.cache_resource
+
 def get_db_connection():
     try:
         return mysql.connector.connect(
