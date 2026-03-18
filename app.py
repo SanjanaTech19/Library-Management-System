@@ -246,15 +246,18 @@ def library_system():
             
             df = pd.read_sql(query, conn)
             for index, row in df.iterrows():
+                book_id = row.get('id') or row.get('ID') or row.get('book_id')
+    
                 with st.container():
                     c1, c2 = st.columns([5, 1])
                     c1.write(f"**{row['title']}** | {row['author']} ({row['genre']})")
                     c1.caption(f"Status: {row['status']} | ISBN: {row['isbn']}")
+        
                     if row['status'] == 'available':
-                        if c2.button("Select", key=f"sel_{row['id']}"):
+                        if c2.button("Select", key=f"sel_{book_id}"):
                             st.session_state.menu_choice = "Borrow Book"
                             st.rerun()
-                st.divider()
+            st.divider()
             conn.close()
 
     # RECOMMENDATION
