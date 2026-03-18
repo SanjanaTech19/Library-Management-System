@@ -127,45 +127,61 @@ def library_system():
     # --- 5. PAGE ROUTING ---
     
     # HOME PAGE (Quick Actions)
+    # HOME PAGE (Quick Actions)
     if choice == "Home":
         st.title(f"👋 Welcome back, {username}!")
         st.markdown(f"### 🏛️ The Reading Nook | **{user_role.upper()} PORTAL**")
         
         st.subheader("Quick Actions")
-        col1, col2, col3 = st.columns(3)
         
-        with col1:
-            st.markdown("### 📖 Catalog")
-            st.write("Browse and search books.")
-            if st.button("Open Catalog", use_container_width=True):
-                st.session_state.menu_choice = "View All Books"
-                st.rerun()
-        
-        with col2:
-            st.markdown("### 📤 Issue")
-            st.write("Process a book loan.")
-            if st.button("Borrow Now", use_container_width=True):
-                st.session_state.menu_choice = "Borrow Book"
-                st.rerun()
-                
-        with col3:
-            st.markdown("### 📥 Return")
-            st.write("Return books and check fines.")
-            if st.button("Process Return", use_container_width=True):
-                st.session_state.menu_choice = "Return Book"
-                st.rerun()
-
+        # --- ADMIN HOME PAGE ---
         if user_role == "admin":
-            st.divider()
-            st.markdown("#### 🛡️ Administrative Controls")
-            a1, a2 = st.columns(2)
-            with a1:
-                if st.button("📊 View Stats Dashboard", use_container_width=True):
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown("### 📊 Analytics")
+                st.write("Check library stats and fines.")
+                if st.button("Open Dashboard", use_container_width=True):
                     st.session_state.menu_choice = "Dashboard"
                     st.rerun()
-            with a2:
-                if st.button("➕ Add New Inventory", use_container_width=True):
+            
+            with col2:
+                st.markdown("### ➕ Inventory")
+                st.write("Add new books to the catalog.")
+                if st.button("Add New Book", use_container_width=True):
                     st.session_state.menu_choice = "Add Book"
+                    st.rerun()
+                    
+            with col3:
+                st.markdown("### 📩 Requests")
+                st.write("Review student book suggestions.")
+                if st.button("View Suggestions", use_container_width=True):
+                    st.session_state.menu_choice = "Review Suggestions"
+                    st.rerun()
+
+        # --- STUDENT/USER HOME PAGE ---
+        else:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.markdown("### 📖 Catalog")
+                st.write("Browse and search books.")
+                if st.button("Open Catalog", use_container_width=True):
+                    st.session_state.menu_choice = "View All Books"
+                    st.rerun()
+            
+            with col2:
+                st.markdown("### 📤 Borrow")
+                st.write("Process a book loan.")
+                if st.button("Borrow Now", use_container_width=True):
+                    st.session_state.menu_choice = "Borrow Book"
+                    st.rerun()
+                    
+            with col3:
+                st.markdown("### 📥 Return")
+                st.write("Return books and check fines.")
+                if st.button("Process Return", use_container_width=True):
+                    st.session_state.menu_choice = "Return Book"
                     st.rerun()
 
     # ADD BOOK (Admin)
